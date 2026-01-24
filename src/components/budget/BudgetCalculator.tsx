@@ -120,7 +120,15 @@ export default function BudgetCalculator() {
     };
 
     const handleAction = (action: "USER_TXT" | "COMPANY_PDF") => {
-        handleSubmit((data) => onSubmit(data, action))();
+        handleSubmit(
+            (data) => onSubmit(data, action),
+            (errors) => {
+                console.error("Validation errors:", errors);
+                alert("Por favor, revisa el formulario. Faltan datos obligatorios (marcados en rojo en cada sección).");
+                // Optional: Force open the first section with errors?
+                // Ideally toggle accordion
+            }
+        )();
     };
 
 
