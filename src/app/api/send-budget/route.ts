@@ -26,14 +26,31 @@ export async function POST(req: Request) {
 
         const data = validation.data;
 
+        // Check Environment Variables
+        const smtpHost = process.env.SMTP_HOST || "smtp.gmail.com";
+        const smtpPort = Number(process.env.SMTP_PORT) || 587;
+        const smtpUser = process.env.SMTP_USER;
+        const smtpPass = process.env.SMTP_PASS;
+
+        console.log("SMTP Config Check:", {
+            host: smtpHost,
+            port: smtpPort,
+            user: smtpUser ? "Set" : "Missing",
+            pass: smtpPass ? "Set" : "Missing"
+        });
+
+        if (!smtpUser || !smtpPass) {
+            throw new Error("Faltan las credenciales SMTP_USER o SMTP_PASS en las variables de entorno.");
+        }
+
         // Configure Transporter with Environment Variables
         const transporter = nodemailer.createTransport({
-            host: process.env.SMTP_HOST,
-            port: Number(process.env.SMTP_PORT),
+            host: smtpHost,
+            port: smtpPort,
             secure: false, // true for 465, false for other ports
             auth: {
-                user: process.env.SMTP_USER,
-                pass: process.env.SMTP_PASS,
+                user: smtpUser,
+                pass: smtpPass,
             },
         });
 
