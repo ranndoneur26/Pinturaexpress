@@ -106,7 +106,19 @@ export default function BudgetCalculator() {
                 method: "POST",
                 body: formData,
             });
-            const result = await res.json();
+
+            if (res.status === 413) {
+                alert("Error: Las imágenes son demasiado grandes. El límite total es 4.5MB.");
+                return;
+            }
+
+            let result;
+            try {
+                result = await res.json();
+            } catch (jsonError) {
+                console.error("JSON Parse Error:", jsonError);
+                throw new Error(`Error del servidor (${res.status}): Respuesta no válida (posible timeout o error de red)`);
+            }
 
             if (result.success) {
                 if (action === "USER_TXT") alert("Presupuesto enviado a tu correo correctamente.");
@@ -115,7 +127,9 @@ export default function BudgetCalculator() {
                 alert("Error al enviar: " + (result.error || "Desconocido"));
             }
         } catch (err) {
-            alert("Error de conexión al enviar el presupuesto.");
+            console.error("Submit Error:", err);
+            const errorMessage = err instanceof Error ? err.message : "Error desconocido";
+            alert(`Error de conexión o servidor: ${errorMessage}. Inténtalo de nuevo con imágenes más pequeñas.`);
         }
     };
 
