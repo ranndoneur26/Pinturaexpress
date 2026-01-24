@@ -47,7 +47,7 @@ export default function LegalModal({ isOpen, onClose }: LegalModalProps) {
                         La titularidad de este sitio web, Pinturaexpress, (www.pinturaexpress.org) la ostenta: Marc Xicola Tugas, con NIF: 52172995w, y cuyos datos de contacto son:<br />
                         Dirección: C/Pau Claris 15. baixos. 08100 Mollet del Vallès<br />
                         Teléfono de contacto: 622566385<br />
-                        Email de contacto: marketing@carbonoexpress.com
+                        Email de contacto: expresscarbono@gmail.com
                     </p>
 
                     <h3 className="text-lg font-bold text-primary mt-6">II. TÉRMINOS Y CONDICIONES GENERALES DE USO</h3>

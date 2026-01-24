@@ -10,7 +10,7 @@ export default function Home() {
       <main className="container mx-auto px-4 pt-32">
         {/* Hero Section */}
         <section className="mb-20 text-center">
-          <h1 className="mb-6 bg-gradient-to-r from-white to-gray-400 bg-clip-text text-5xl font-extrabold text-transparent sm:text-7xl">
+          <h1 className="mb-6 text-3xl font-extrabold sm:text-5xl" style={{ color: '#b7bf10' }}>
             PinturaExpress
           </h1>
           <p className="mx-auto max-w-2xl text-xl text-gray-400">
