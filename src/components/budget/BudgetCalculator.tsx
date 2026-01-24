@@ -138,14 +138,14 @@ export default function BudgetCalculator() {
             (data) => onSubmit(data, action),
             (errors) => {
                 console.error("Validation errors:", errors);
-                // Debug mode: Show granular errors
-                let debugMsg = "DEBUG INFO - Errores detectados:\n";
-                // Helper to list keys
+                // Build user-friendly error message
+                let errorMsg = "Por favor, completa los siguientes campos obligatorios:\n\n";
+
                 const listErrors = (obj: any, prefix = ""): string => {
                     let msg = "";
                     for (const key in obj) {
                         if (obj[key]?.message) {
-                            msg += `${prefix}${key}: ${obj[key].message}\n`;
+                            msg += `• ${obj[key].message}\n`;
                         } else if (typeof obj[key] === 'object' && obj[key] !== null) {
                             msg += listErrors(obj[key], `${prefix}${key}.`);
                         }
@@ -153,13 +153,9 @@ export default function BudgetCalculator() {
                     return msg;
                 };
 
-                debugMsg += listErrors(errors);
+                errorMsg += listErrors(errors);
 
-                if (debugMsg === "DEBUG INFO - Errores detectados:\n") {
-                    debugMsg += JSON.stringify(errors, null, 2);
-                }
-
-                alert(debugMsg);
+                alert(errorMsg);
             }
         )();
     };
