@@ -33,7 +33,7 @@ export const budgetSchema = z.object({
         dismantling: z.enum(["NONE", "PARTIAL", "FULL"]),
         transport: z.enum(["NONE", "OWN_BOX", "FULL_SERVICE"]),
     }),
-    files: z.array(z.any()).max(6, "Máximo 6 imágenes").optional(),
+    files: z.any().optional(),
     budgetNumber: z.string().optional(),
     totalPrice: z.number().optional(),
     action: z.enum(["USER_TXT", "COMPANY_PDF"]).optional(),
