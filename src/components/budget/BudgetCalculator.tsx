@@ -124,27 +124,28 @@ export default function BudgetCalculator() {
             (data) => onSubmit(data, action),
             (errors) => {
                 console.error("Validation errors:", errors);
-                let errorMsg = "Faltan los siguientes datos:\n";
+                // Debug mode: Show granular errors
+                let debugMsg = "DEBUG INFO - Errores detectados:\n";
+                // Helper to list keys
+                const listErrors = (obj: any, prefix = ""): string => {
+                    let msg = "";
+                    for (const key in obj) {
+                        if (obj[key]?.message) {
+                            msg += `${prefix}${key}: ${obj[key].message}\n`;
+                        } else if (typeof obj[key] === 'object' && obj[key] !== null) {
+                            msg += listErrors(obj[key], `${prefix}${key}.`);
+                        }
+                    }
+                    return msg;
+                };
 
-                // Client Errors
-                if (errors.client) {
-                    const clientErrors = errors.client as any;
-                    if (clientErrors.name) errorMsg += "- Nombre del cliente\n";
-                    if (clientErrors.email) errorMsg += "- Email válido\n";
-                    if (clientErrors.phone) errorMsg += "- Teléfono válido\n";
-                    if (clientErrors.address) errorMsg += "- Dirección\n";
-                    if (clientErrors.city) errorMsg += "- Ciudad\n";
-                    if (clientErrors.postalCode) errorMsg += "- Código Postal\n";
+                debugMsg += listErrors(errors);
+
+                if (debugMsg === "DEBUG INFO - Errores detectados:\n") {
+                    debugMsg += JSON.stringify(errors, null, 2);
                 }
 
-                // Other sections
-                if (errors.bike) errorMsg += "- Datos de la bicicleta\n";
-                if (errors.elements) errorMsg += "- Elementos a pintar\n";
-                if (errors.painting) errorMsg += "- Selección de pintura\n";
-                if (errors.finishes) errorMsg += "- Acabados\n";
-                if (errors.services) errorMsg += "- Servicios (Montaje/Transporte)\n";
-
-                alert(errorMsg);
+                alert(debugMsg);
             }
         )();
     };
