@@ -121,8 +121,8 @@ export default function BudgetCalculator() {
             }
 
             if (result.success) {
-                if (action === "USER_TXT") alert("Presupuesto enviado a tu correo correctamente.");
-                else alert("Solicitud enviada a PinturaExpress correctamente.");
+                if (action === "USER_TXT") alert("Presupuesto enviado correctamente a tu dirección de e-mail introducida en el formulario.");
+                else alert("Presupuesto enviado correctamente a Carbonoexpress.");
             } else {
                 alert("Error al enviar: " + (result.error || "Desconocido"));
             }
