@@ -3,18 +3,17 @@
 import { useFormContext } from "react-hook-form";
 import { BudgetFormData } from "@/lib/schemas";
 import { UploadCloud, X, AlertCircle } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
-const MAX_FILE_SIZE_MB = 4;
-const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
-const MAX_FILES = 3;
-const MAX_TOTAL_SIZE_MB = 12;
+const MAX_TOTAL_SIZE_MB = 20;
+const MAX_TOTAL_SIZE_BYTES = MAX_TOTAL_SIZE_MB * 1024 * 1024;
 
 export default function FileUploadForm() {
-    const { register, watch, setValue } = useFormContext<BudgetFormData>();
-    const files = watch("files");
+    const { setValue } = useFormContext<BudgetFormData>();
     const [error, setError] = useState<string | null>(null);
     const [validFiles, setValidFiles] = useState<File[]>([]);
+
+    const getTotalSize = (files: File[]) => files.reduce((acc, file) => acc + file.size, 0);
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setError(null);
@@ -28,26 +27,10 @@ export default function FileUploadForm() {
 
         const filesArray = Array.from(selectedFiles);
 
-        // Check max files
-        if (filesArray.length > MAX_FILES) {
-            setError(`Máximo ${MAX_FILES} imágenes permitidas`);
-            e.target.value = "";
-            return;
-        }
-
-        // Check individual file sizes
-        for (const file of filesArray) {
-            if (file.size > MAX_FILE_SIZE_BYTES) {
-                setError(`Reduce el tamaño de imagen máximo ${MAX_FILE_SIZE_MB} Mb por imagen`);
-                e.target.value = "";
-                return;
-            }
-        }
-
-        // Check total size
-        const totalSize = filesArray.reduce((acc, file) => acc + file.size, 0);
-        if (totalSize > MAX_TOTAL_SIZE_MB * 1024 * 1024) {
-            setError(`El tamaño total no puede superar ${MAX_TOTAL_SIZE_MB} MB`);
+        // Check total size only
+        const totalSize = getTotalSize(filesArray);
+        if (totalSize > MAX_TOTAL_SIZE_BYTES) {
+            setError(`Máximo ${MAX_TOTAL_SIZE_MB} Mb`);
             e.target.value = "";
             return;
         }
@@ -63,12 +46,13 @@ export default function FileUploadForm() {
         if (newFiles.length === 0) {
             setValue("files", undefined);
         } else {
-            // Create a new FileList-like object
             const dt = new DataTransfer();
             newFiles.forEach(file => dt.items.add(file));
             setValue("files", dt.files);
         }
     };
+
+    const currentTotalMB = (getTotalSize(validFiles) / 1024 / 1024).toFixed(2);
 
     return (
         <div className="space-y-4">
@@ -90,7 +74,7 @@ export default function FileUploadForm() {
                             Haz clic o arrastra imágenes aquí
                         </p>
                         <p className="text-sm text-white/50">
-                            Máximo {MAX_FILES} imágenes, {MAX_FILE_SIZE_MB} MB por imagen (JPG, PNG)
+                            Máximo {MAX_TOTAL_SIZE_MB} Mb (JPG, PNG)
                         </p>
                     </div>
                 </div>
@@ -105,7 +89,9 @@ export default function FileUploadForm() {
 
             {validFiles.length > 0 && (
                 <div className="space-y-2">
-                    <p className="text-sm font-medium text-white/80">Archivos seleccionados ({validFiles.length}/{MAX_FILES}):</p>
+                    <p className="text-sm font-medium text-white/80">
+                        Archivos seleccionados ({validFiles.length}) - {currentTotalMB}/{MAX_TOTAL_SIZE_MB} MB:
+                    </p>
                     <div className="space-y-1">
                         {validFiles.map((file, index) => (
                             <div key={index} className="flex items-center justify-between gap-2 rounded px-3 py-2 bg-white/5 text-sm text-white/70">
@@ -128,4 +114,3 @@ export default function FileUploadForm() {
         </div>
     );
 }
-
