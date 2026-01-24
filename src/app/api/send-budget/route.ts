@@ -146,7 +146,7 @@ Condiciones aceptadas.
     } catch (error) {
         console.error("Error processing budget:", error);
         return NextResponse.json(
-            { error: "Error interno del servidor" },
+            { error: "Error al enviar email: " + (error as Error).message },
             { status: 500 }
         );
     }
