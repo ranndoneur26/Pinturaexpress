@@ -116,8 +116,15 @@ export default function BudgetSummary({ budgetNumber, onAction }: BudgetSummaryP
                     <span>{total}€</span>
                 </div>
 
-                {formData.finishes?.comments && (
+                {formData.painting?.pantoneColors && (
                     <div className="mt-8 pt-4 border-t border-white/10">
+                        <p className="text-xs text-white/50 mb-1">Colores Ral/Pantone/Camaleón:</p>
+                        <p className="text-xs text-white/80 italic">"{formData.painting.pantoneColors}"</p>
+                    </div>
+                )}
+
+                {formData.finishes?.comments && (
+                    <div className="mt-4 pt-4 border-t border-white/10">
                         <p className="text-xs text-white/50 mb-1">Notas del cliente:</p>
                         <p className="text-xs text-white/80 italic">"{formData.finishes.comments}"</p>
                     </div>

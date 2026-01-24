@@ -191,7 +191,7 @@ export default function BudgetCalculator() {
                 stepName = "Elementos a Pintar";
                 break;
             case "item-5": // Validate Step 4: Paint
-                fieldsToValidate = ["painting.type"];
+                fieldsToValidate = ["painting.type", "painting.pantoneColors"];
                 stepName = "Pintura";
                 break;
             case "item-6": // Validate Step 5: Finishes

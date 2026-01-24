@@ -22,7 +22,7 @@ export const budgetSchema = z.object({
     painting: z.object({
         type: z.enum(["ONE_COLOR", "TWO_COLORS", "THREE_COLORS", "FOUR_COLORS", "CHAMELEON", "CHAMELEON_ONE", "FLUOR", "METALLIC", "FRAME_FORK_CARBON", "FRAME_FORK_SWINGARM_CARBON", "VARNISH_FRAME_FORK", "VARNISH_FRAME_FORK_SWINGARM", "OTHER"]),
         otherText: z.string().optional(),
-        pantoneColors: z.string().optional(),
+        pantoneColors: z.string().min(1, "Debes indicar los colores Ral/Pantone/Camaleón"),
     }),
     finishes: z.object({
         logos: z.enum(["NONE", "VINYL", "PAINTED"]),
