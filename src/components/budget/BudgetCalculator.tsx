@@ -17,10 +17,12 @@ import FileUploadForm from "./steps/FileUploadForm";
 import BudgetSummary from "./BudgetSummary";
 import jsPDF from "jspdf";
 import { toPng } from "html-to-image";
+import imageCompression from 'browser-image-compression';
 
 export default function BudgetCalculator() {
     const [openItem, setOpenItem] = useState("item-1");
     const [budgetNumber, setBudgetNumber] = useState("");
+    const [isProcessing, setIsProcessing] = useState(false);
 
     useEffect(() => {
         // Generate Budget Number once on mount
@@ -45,70 +47,118 @@ export default function BudgetCalculator() {
     const { handleSubmit, trigger, formState: { errors } } = methods;
 
     const onSubmit = async (data: BudgetFormData, action: "USER_TXT" | "COMPANY_PDF") => {
+        if (isProcessing) return;
+        setIsProcessing(true);
         console.log("Submitting:", data, action);
-        const totalPrice = calculateBudget(data as any);
-        const payload = {
-            ...data,
-            budgetNumber,
-            totalPrice,
-            action
-        };
 
-        const formData = new FormData();
-        formData.append("data", JSON.stringify(payload));
+        try {
+            const totalPrice = calculateBudget(data as any);
+            const payload = {
+                ...data,
+                budgetNumber,
+                totalPrice,
+                action
+            };
 
-        // Handle Files
-        if (data.files && data.files.length > 0) {
-            Array.from(data.files as any).forEach((file: any) => {
-                formData.append("files", file as Blob);
-            });
-        }
+            const formData = new FormData();
+            formData.append("data", JSON.stringify(payload));
 
-        // Handle PDF generation for Company
-        if (action === "COMPANY_PDF") {
-            const summaryElement = document.getElementById("budget-summary-card");
-            if (summaryElement) {
-                try {
-                    // Force black background for the capture to emulate the dark theme look
-                    const dataUrl = await toPng(summaryElement, {
-                        backgroundColor: "#1a1a1a",
-                        pixelRatio: 2,
-                        // Using filter to ignore specific elements
-                        filter: (node) => {
-                            // Check if node is an element to check tagName
-                            if (node instanceof HTMLElement) {
-                                return node.tagName !== 'BUTTON' && node.tagName !== 'INPUT';
-                            }
-                            return true;
+            // Handle Files with Compression
+            if (data.files && data.files.length > 0) {
+                const filesArray = Array.from(data.files as any) as File[];
+
+                // Calculate target size per file to fit within ~4MB (leaving headroom)
+                // If 3 fields, approx 1.3MB each. If 1 file, 4MB.
+                const MAX_TOTAL_mb = 4.0;
+                const targetSizeMB = MAX_TOTAL_mb / filesArray.length;
+
+                for (const file of filesArray) {
+                    // Solo comprimir si es imagen
+                    if (file.type.startsWith('image/')) {
+                        console.log(`Comprimiendo ${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)...`);
+
+                        const options = {
+                            maxSizeMB: targetSizeMB,
+                            maxWidthOrHeight: 1920,
+                            useWebWorker: true,
+                            initialQuality: 0.7,
+                        };
+
+                        try {
+                            const compressedFile = await imageCompression(file, options);
+                            console.log(`Comprimido: ${(compressedFile.size / 1024 / 1024).toFixed(2)} MB`);
+                            formData.append("files", compressedFile);
+                        } catch (error) {
+                            console.error("Error comprimiendo imagen:", error);
+                            // Si falla compresión, intentar enviar original (riesgo de 413)
+                            formData.append("files", file);
                         }
-                    });
-
-                    const pdf = new jsPDF();
-                    const pdfWidth = pdf.internal.pageSize.getWidth();
-                    // Calculate height maintaining aspect ratio
-                    const elementWidth = summaryElement.offsetWidth;
-                    const elementHeight = summaryElement.offsetHeight;
-                    const pdfHeight = (elementHeight * pdfWidth) / elementWidth;
-
-                    pdf.addImage(dataUrl, "PNG", 0, 0, pdfWidth, pdfHeight);
-                    const pdfBlob = pdf.output("blob");
-                    formData.append("pdf", pdfBlob, `Presupuesto-${budgetNumber}.pdf`);
-                } catch (error) {
-                    console.error("Error generating PDF:", error);
-                    alert("Error generando el PDF. Se enviará sin PDF adjunto.");
+                    } else {
+                        formData.append("files", file);
+                    }
                 }
             }
-        }
 
-        // API Call
-        try {
+            // Handle PDF generation for Company
+            if (action === "COMPANY_PDF") {
+                const summaryElement = document.getElementById("budget-summary-card");
+                if (summaryElement) {
+                    try {
+                        // Force black background for the capture to emulate the dark theme look
+                        const dataUrl = await toPng(summaryElement, {
+                            backgroundColor: "#1a1a1a",
+                            pixelRatio: 2,
+                            // Using filter to ignore specific elements
+                            filter: (node) => {
+                                // Check if node is an element to check tagName
+                                if (node instanceof HTMLElement) {
+                                    return node.tagName !== 'BUTTON' && node.tagName !== 'INPUT';
+                                }
+                                return true;
+                            }
+                        });
+
+                        const pdf = new jsPDF();
+                        const pdfWidth = pdf.internal.pageSize.getWidth();
+                        // Calculate height maintaining aspect ratio
+                        const elementWidth = summaryElement.offsetWidth;
+                        const elementHeight = summaryElement.offsetHeight;
+                        const pdfHeight = (elementHeight * pdfWidth) / elementWidth;
+
+                        pdf.addImage(dataUrl, "PNG", 0, 0, pdfWidth, pdfHeight);
+                        const pdfBlob = pdf.output("blob");
+                        formData.append("pdf", pdfBlob, `Presupuesto-${budgetNumber}.pdf`);
+                    } catch (error) {
+                        console.error("Error generating PDF:", error);
+                        alert("Error generando el PDF. Se enviará sin PDF adjunto.");
+                    }
+                }
+            }
+
+            // Check total size estimate before sending
+            // FormData size is tricky to get exactly, but we can sum blob sizes
+            /*
+            let totalPayloadSize = 0;
+            // @ts-ignore
+            for(let pair of formData.entries()) {
+                if(pair[1] instanceof Blob) totalPayloadSize += pair[1].size;
+                else totalPayloadSize += (pair[1] as string).length;
+            }
+            if(totalPayloadSize > 4.5 * 1024 * 1024) {
+                 alert("Aviso: Incluso después de la compresión, los archivos son demasiado grandes para el servidor. Intenta enviarlos por separado o reduce más su tamaño.");
+                 // We try sending anyway just in case
+            }
+            */
+
+            // API Call
             const res = await fetch("/api/send-budget", {
                 method: "POST",
                 body: formData,
             });
 
             if (res.status === 413) {
-                alert("Error: Las imágenes son demasiado grandes. El límite total es 20MB.");
+                alert("Error: Las imágenes son demasiado grandes para el servidor (Límite físico 4.5MB). La compresión automática no fue suficiente. Por favor, reduce la cantidad de fotos o envíalas por email aparte.");
+                setIsProcessing(false);
                 return;
             }
 
@@ -117,7 +167,7 @@ export default function BudgetCalculator() {
                 result = await res.json();
             } catch (jsonError) {
                 console.error("JSON Parse Error:", jsonError);
-                throw new Error(`Error del servidor (${res.status}): Respuesta no válida (posible timeout o error de red)`);
+                throw new Error(`Error del servidor (${res.status}): Respuesta no válida`);
             }
 
             if (result.success) {
@@ -126,10 +176,13 @@ export default function BudgetCalculator() {
             } else {
                 alert("Error al enviar: " + (result.error || "Desconocido"));
             }
+
         } catch (err) {
             console.error("Submit Error:", err);
             const errorMessage = err instanceof Error ? err.message : "Error desconocido";
-            alert(`Error de conexión o servidor: ${errorMessage}. Inténtalo de nuevo con imágenes más pequeñas.`);
+            alert(`Error de conexión o servidor: ${errorMessage}.`);
+        } finally {
+            setIsProcessing(false);
         }
     };
 
