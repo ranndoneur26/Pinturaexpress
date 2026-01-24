@@ -42,7 +42,7 @@ export default function BudgetCalculator() {
         }
     });
 
-    const { handleSubmit, formState: { errors } } = methods;
+    const { handleSubmit, trigger, formState: { errors } } = methods;
 
     const onSubmit = async (data: BudgetFormData, action: "USER_TXT" | "COMPANY_PDF") => {
         console.log("Submitting:", data, action);
@@ -132,13 +132,57 @@ export default function BudgetCalculator() {
     };
 
 
+
+
+    // ... handleAction ...
+
     const toggleItem = (value: string) => {
         setOpenItem((prev) => (prev === value ? "" : value));
     };
 
-    const nextStep = (nextItem: string) => {
-        setOpenItem(nextItem);
-    }
+    const nextStep = async (nextItem: string) => {
+        let fieldsToValidate: any[] = [];
+        let stepName = "";
+
+        switch (nextItem) {
+            case "item-2": // Validate Step 1: Client
+                fieldsToValidate = ["client.name", "client.email", "client.phone", "client.address", "client.city", "client.postalCode"];
+                stepName = "Datos Cliente";
+                break;
+            case "item-3": // Validate Step 2: Bike
+                fieldsToValidate = ["bike.type"];
+                stepName = "Bicicleta";
+                break;
+            case "item-4": // Validate Step 3: Elements
+                fieldsToValidate = ["elements.type"];
+                stepName = "Elementos a Pintar";
+                break;
+            case "item-5": // Validate Step 4: Paint
+                fieldsToValidate = ["painting.type"];
+                stepName = "Pintura";
+                break;
+            case "item-6": // Validate Step 5: Finishes
+                fieldsToValidate = ["finishes.logos", "finishes.varnish"];
+                stepName = "Acabados";
+                break;
+            case "item-7": // Validate Step 6: Dismantling
+                fieldsToValidate = ["services.dismantling"];
+                stepName = "Montaje y Desmontaje";
+                break;
+            case "item-8": // Validate Step 7: Transport
+                fieldsToValidate = ["services.transport"];
+                stepName = "Transporte";
+                break;
+        }
+
+        const isStepValid = await trigger(fieldsToValidate);
+
+        if (isStepValid) {
+            setOpenItem(nextItem);
+        } else {
+            alert(`Por favor rellene el campo obligatorio de "${stepName}" antes de pasar al siguiente punto.`);
+        }
+    };
 
     return (
         <FormProvider {...methods}>
