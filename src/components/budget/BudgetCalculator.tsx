@@ -124,9 +124,27 @@ export default function BudgetCalculator() {
             (data) => onSubmit(data, action),
             (errors) => {
                 console.error("Validation errors:", errors);
-                alert("Por favor, revisa el formulario. Faltan datos obligatorios (marcados en rojo en cada sección).");
-                // Optional: Force open the first section with errors?
-                // Ideally toggle accordion
+                let errorMsg = "Faltan los siguientes datos:\n";
+
+                // Client Errors
+                if (errors.client) {
+                    const clientErrors = errors.client as any;
+                    if (clientErrors.name) errorMsg += "- Nombre del cliente\n";
+                    if (clientErrors.email) errorMsg += "- Email válido\n";
+                    if (clientErrors.phone) errorMsg += "- Teléfono válido\n";
+                    if (clientErrors.address) errorMsg += "- Dirección\n";
+                    if (clientErrors.city) errorMsg += "- Ciudad\n";
+                    if (clientErrors.postalCode) errorMsg += "- Código Postal\n";
+                }
+
+                // Other sections
+                if (errors.bike) errorMsg += "- Datos de la bicicleta\n";
+                if (errors.elements) errorMsg += "- Elementos a pintar\n";
+                if (errors.painting) errorMsg += "- Selección de pintura\n";
+                if (errors.finishes) errorMsg += "- Acabados\n";
+                if (errors.services) errorMsg += "- Servicios (Montaje/Transporte)\n";
+
+                alert(errorMsg);
             }
         )();
     };
