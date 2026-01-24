@@ -59,8 +59,8 @@ export default function BudgetCalculator() {
 
         // Handle Files
         if (data.files && data.files.length > 0) {
-            Array.from(data.files).forEach((file) => {
-                formData.append("files", file);
+            Array.from(data.files as any).forEach((file: any) => {
+                formData.append("files", file as Blob);
             });
         }
 
