@@ -36,7 +36,7 @@ export default function Footer() {
                                 <p>Oficina: Pau Claris 15 bajos.</p>
                                 <p>08100 Mollet dels Vallès.</p>
                                 <p>Tel. 622 566 385</p>
-                                <p className="text-black/60 text-sm mt-2">expresscarbono@gmail.com / <a href="http://www.carbonoexpress.com" target="_blank" rel="noopener noreferrer" className="hover:underline hover:text-[#008080]">www.carbonoexpress.com</a></p>
+                                <p className="text-black/60 text-sm mt-2"><a href="mailto:expresscarbono@gmail.com" className="hover:underline">expresscarbono@gmail.com</a> <a href="http://www.carbonoexpress.com" target="_blank" rel="noopener noreferrer" className="hover:underline hover:text-[#008080]">www.carbonoexpress.com</a></p>
                             </div>
                         </div>
                     </div>

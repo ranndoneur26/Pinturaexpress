@@ -5,7 +5,7 @@ import { BudgetFormData } from "@/lib/schemas";
 import { UploadCloud, X, AlertCircle } from "lucide-react";
 import { useState } from "react";
 
-const MAX_TOTAL_SIZE_MB = 20;
+const MAX_TOTAL_SIZE_MB = 4.5;
 const MAX_TOTAL_SIZE_BYTES = MAX_TOTAL_SIZE_MB * 1024 * 1024;
 
 export default function FileUploadForm() {
@@ -74,7 +74,7 @@ export default function FileUploadForm() {
                             Haz clic o arrastra imágenes aquí
                         </p>
                         <p className="text-sm text-white/50">
-                            Máximo {MAX_TOTAL_SIZE_MB} Mb (JPG, PNG)
+                            Máximo 4,5 MB (JPG, PNG). Si necesitas enviar más fotos, envíalas por e-mail a expresscarbono@gmail.com, indicando tu número de presupuesto en el Subject
                         </p>
                     </div>
                 </div>
