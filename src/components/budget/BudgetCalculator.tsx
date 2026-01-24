@@ -108,7 +108,7 @@ export default function BudgetCalculator() {
             });
 
             if (res.status === 413) {
-                alert("Error: Las imágenes son demasiado grandes. El límite total es 4.5MB.");
+                alert("Error: Las imágenes son demasiado grandes. El límite total es 20MB.");
                 return;
             }
 
