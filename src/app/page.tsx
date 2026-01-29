@@ -3,12 +3,8 @@
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import BudgetCalculator from "@/components/budget/BudgetCalculator";
-import WebsiteModal from "@/components/ui/WebsiteModal";
-import { useState } from "react";
 
 export default function Home() {
-  const [isCarbonoModalOpen, setIsCarbonoModalOpen] = useState(false);
-
   return (
     <div className="min-h-screen bg-black bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-gray-900 via-black to-black font-sans text-white">
       <Header />
@@ -24,12 +20,14 @@ export default function Home() {
           </p>
           <p className="mx-auto mt-4 max-w-2xl text-lg text-gray-400">
             Si deseas más información sobre nuestro trabajos de pintura, visita nuestra web:{" "}
-            <button
-              onClick={() => setIsCarbonoModalOpen(true)}
+            <a
+              href="https://carbonoexpress.com/trabajos-de-pintura-presupuesto"
+              target="_blank"
+              rel="noopener noreferrer"
               className="text-[#b7bf10] hover:underline hover:text-[#d4dd12] transition-colors font-medium"
             >
               carbonoexpress.com
-            </button>
+            </a>
           </p>
         </section>
 
@@ -40,13 +38,6 @@ export default function Home() {
       </main>
 
       <Footer />
-
-      <WebsiteModal
-        isOpen={isCarbonoModalOpen}
-        onClose={() => setIsCarbonoModalOpen(false)}
-        url="https://carbonoexpress.com/trabajos-de-pintura-presupuesto"
-        title="CarbonoExpress - Trabajos de Pintura"
-      />
     </div>
   );
 }
